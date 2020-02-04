@@ -1,3 +1,5 @@
+import os
+
 import eventlet
 import socketio
 
@@ -18,7 +20,12 @@ def main():
     global static_files
 
     app = socketio.WSGIApp(sio, static_files=static_files)
-    eventlet.wsgi.server(eventlet.listen(('', 8000)), app)
+
+    port = 8000
+    if 'PORT' in os.environ:
+        port = os.environ['PORT']
+
+    eventlet.wsgi.server(eventlet.listen(('', port)), app)
 
 
 #*################################################################### SIO
