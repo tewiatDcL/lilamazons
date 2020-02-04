@@ -7,7 +7,8 @@ sio = socketio.Server()
 
 static_files = {
     '/': 'pages/index.html',
-    '/js/client': 'public/js/client.js'
+    '/js/client': 'public/js/client.js',
+    '/css/default': 'public/css/default.css'
 }
 
 
