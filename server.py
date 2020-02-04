@@ -30,6 +30,10 @@ def connect(sid, env):
 def disconnect(sid):
     print(f'Disconnected: {sid}')
 
+@sio.on('register')
+def register(sid, details):
+    print(f'Registration: {details["username"]}')
+
 
 #*################################################################### ENTRY
 if __name__ == '__main__':

@@ -14,4 +14,13 @@ $(() => {
             }
         }
     });
+
+    $('#register').on('click', 'input', (e) => {
+        if (e.target.id == 'btn-register') {
+            socket.emit('register', {
+                username: $('#register-username').val(),
+                password: $('#register-password').val()
+            });
+        }
+    });
 });
