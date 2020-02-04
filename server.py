@@ -3,6 +3,7 @@ import os
 
 import eventlet
 import psycopg2
+import psycopg2.extras
 import socketio
 
 
@@ -22,9 +23,12 @@ else:
     db_url = json.load(open('config.json', 'r'))['db_url']
 
 con = psycopg2.connect(db_url)
-cur = con.cursor()
+cur = con.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
 
 print('Connected to DB') # TODO: Actually check for success
+
+# Server operation
+users = {}
 
 
 #*################################################################### MAIN
@@ -46,9 +50,16 @@ def main():
 def connect(sid, env):
     print(f'Connected: {sid}')
 
+    users[sid] = {
+        'connected': True,
+        'logged_in': False,
+        'username': None
+    }
+
 @sio.on('disconnect')
 def disconnect(sid):
     print(f'Disconnected: {sid}')
+    users[sid]['connected'] = False
 
 @sio.on('register')
 def register(sid, details):
@@ -80,6 +91,28 @@ def register(sid, details):
 @sio.on('login')
 def login(sid, details):
     print(f'Login from {details["username"]}')
+
+    cur.execute(
+        'SELECT * FROM users WHERE username=%(username)s;',
+        { 'username': details['username'] }
+    )
+
+    res = cur.fetchone()
+    if res: # User exists
+        if res['pw_hash'] == details['password']:
+            # Login succeeded
+            users[sid]['logged_in'] = True
+            users[sid]['username'] = details['username']
+
+            sio.emit('logged_in', room=sid)
+
+        else:
+            # Don't specify that the password is just incorrect, otherwise
+            # malicious actors could farm for usernames
+            sio.emit('invalid_credentials', room=sid)
+
+    else:
+        sio.emit('invalid_credentials', room=sid)
 
 
 #*################################################################### ENTRY

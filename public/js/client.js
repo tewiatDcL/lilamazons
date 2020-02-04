@@ -53,4 +53,13 @@ $(() => {
         alert('Registered');
         $('#register').hide();
     });
+
+    socket.on('invalid_credentials', () => {
+        alert('Invalid credentials');
+    });
+
+    socket.on('logged_in', () => {
+        alert('Logged in');
+        $('#login').hide();
+    });
 });
