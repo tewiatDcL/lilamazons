@@ -77,6 +77,10 @@ def register(sid, details):
 
         sio.emit('registered', room=sid)
 
+@sio.on('login')
+def login(sid, details):
+    print(f'Login from {details["username"]}')
+
 
 #*################################################################### ENTRY
 if __name__ == '__main__':

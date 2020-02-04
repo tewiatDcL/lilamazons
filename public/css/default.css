@@ -16,7 +16,7 @@ div#navbar > p {
     color: #aaa;
 }
 
-div#register {
+div#register, div#login {
     display: none;
 
     position: absolute;
