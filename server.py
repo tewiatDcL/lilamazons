@@ -52,7 +52,30 @@ def disconnect(sid):
 
 @sio.on('register')
 def register(sid, details):
+    # TODO: Perform validity checks. Store pw_hash. Store more info
     print(f'Registration: {details["username"]}')
+
+    cur.execute(
+        'SELECT count(*) FROM users WHERE username=%(username)s;',
+        { 'username': details['username'] }
+    )
+
+    if cur.fetchone()[0]: # Username taken
+        sio.emit('username_taken', room=sid)
+
+    else:
+        cur.execute("""
+            INSERT INTO users (username, pw_hash)
+            VALUES (%(username)s, %(pw_hash)s);
+            """,
+            {
+                'username': details['username'],
+                'pw_hash':  details['password']
+            }
+        )
+        con.commit()
+
+        sio.emit('registered', room=sid)
 
 
 #*################################################################### ENTRY

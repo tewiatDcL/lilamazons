@@ -23,4 +23,15 @@ $(() => {
             });
         }
     });
+
+
+    //*************************************************************** SERVER COMMS
+    socket.on('username_taken', () => {
+        alert('Username taken');
+    });
+
+    socket.on('registered', () => {
+        alert('Registered');
+        $('#register').hide();
+    });
 });
