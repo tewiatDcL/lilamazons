@@ -1,6 +1,8 @@
+import json
 import os
 
 import eventlet
+import psycopg2
 import socketio
 
 
@@ -12,6 +14,17 @@ static_files = {
     '/js/client': 'public/js/client.js',
     '/css/default': 'public/css/default.css'
 }
+
+# PostgreSQL
+if 'DATABASE_URL' in os.environ:
+    db_url = os.environ['DATABASE_URL']
+else:
+    db_url = json.load(open('config.json', 'r'))['db_url']
+
+con = psycopg2.connect(db_url)
+cur = con.cursor()
+
+print('Connected to DB') # TODO: Actually check for success
 
 
 #*################################################################### MAIN
