@@ -23,7 +23,7 @@ def main():
 
     port = 8000
     if 'PORT' in os.environ:
-        port = os.environ['PORT']
+        port = int(os.environ['PORT'])
 
     eventlet.wsgi.server(eventlet.listen(('', port)), app)
 
