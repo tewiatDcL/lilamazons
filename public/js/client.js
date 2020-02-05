@@ -58,6 +58,13 @@ $(() => {
         socket.emit('join_lobby', e.target.id);
     });
 
+    //* Lobby
+    $('#lobby').on('click', 'input', (e) => {
+        if (e.target.id == 'btn-lobby-start') {
+            socket.emit('lobby_start');
+        }
+    });
+
 
     //*************************************************************** SERVER COMMS
     let ping_sent = 0;

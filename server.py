@@ -1,3 +1,5 @@
+from Game import Match
+
 import json
 import os
 
@@ -36,6 +38,8 @@ users_online   = 0
 lobbies = {}
 lobby_id = 0
 
+matches = {}
+
 
 #*################################################################### MAIN
 def main():
@@ -69,6 +73,10 @@ def connect(sid, env):
 def disconnect(sid):
     print(f'Disconnected: {sid}')
     clients[sid]['connected'] = False
+
+    uid = clients[sid]['uid']
+    if uid:
+        users[uid]['online'] = False
 
     global clients_online
     clients_online -= 1
@@ -133,11 +141,16 @@ def login(sid, details):
             clients[sid]['logged_in'] = True
             clients[sid]['uid'] = res['id']
 
-            users[res['id']] = {
-                'sid': sid,
-                'username': res['username'],
-                'online': True
-            }
+            if res['id'] not in users:
+                users[res['id']] = {
+                    'sid':      sid,
+                    'username': res['username'],
+                    'online':   True,
+                    'in_lobby': None
+                }
+            else:
+                users[res['id']]['sid']    = sid
+                users[res['id']]['online'] = True
 
             sio.emit('logged_in', details['username'], room=sid)
 
@@ -145,8 +158,10 @@ def login(sid, details):
             users_online += 1
 
             # Check whether the user had a lobby open
-            if res['id'] in lobbies:
-                sio.emit('lobby_data', lobbies[res['id']], room=sid)
+            in_lobby = users[res['id']]['in_lobby']
+
+            if in_lobby:
+                sio.emit('lobby_data', lobbies[in_lobby], room=sid)
 
         else:
             # Don't specify that the password is just incorrect, otherwise
@@ -160,6 +175,7 @@ def login(sid, details):
 @sio.on('create_lobby')
 def create_lobby(sid):
     # TODO: Lobbies should expire after a while
+    # TODO: Prevent creation of multiple lobbies by one user
     uid = clients[sid]['uid']
 
     if uid not in users:
@@ -169,14 +185,16 @@ def create_lobby(sid):
     lid = lobby_id
     lobby_id += 1
 
-    lobbies[uid] = {
-        'id': lid,
+    lobbies[lid] = {
+        'id':      lid,
+        'host_id': uid,
         'players': {
             users[uid]['username']: uid
         }
     }
 
-    sio.emit('lobby_data', lobbies[uid], room=sid)
+    users[uid]['in_lobby'] = lid
+    sio.emit('lobby_data', lobbies[lid], room=sid)
 
 @sio.on('get_open_lobbies')
 def get_open_lobbies(sid):
@@ -188,15 +206,29 @@ def join_lobby(sid, lobby_id):
     lobby_id = int(lobby_id)
     uid = clients[sid]['uid']
 
-    for l in lobbies:
-        if lobbies[l]['id'] == lobby_id:
-            lobbies[l]['players'][users[uid]['username']] = uid
+    if uid not in users:
+        return # TODO: Log this event
 
-            for p in lobbies[l]['players']:
-                usid = users[lobbies[l]['players'][p]]['sid']
-                sio.emit('lobby_data', lobbies[l], room=usid)
+    # Add current user to the lobby
+    lobbies[lobby_id]['players'][users[uid]['username']] = uid
+    users[uid]['in_lobby'] = lobby_id
 
-            return
+    # Send the updated lobby data to all users in the lobby
+    players = lobbies[lobby_id]['players']
+
+    for p in players:
+        usid = users[players[p]]['sid']
+        sio.emit('lobby_data', lobbies[lobby_id], room=usid)
+
+@sio.on('lobby_start')
+def lobby_start(sid):
+    uid = clients[sid]['uid']
+    lobby_id = users[uid]['in_lobby']
+
+    if (lobby_id not in lobbies) or (uid != lobbies[lobby_id]['host_id']):
+        return # TODO: Log this event
+
+    matches[lobby_id] = Match.Match(lobby_id)
 
 
 #*################################################################### ENTRY
