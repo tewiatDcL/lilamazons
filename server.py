@@ -207,6 +207,11 @@ def get_open_lobbies(sid):
 @sio.on('join_lobby')
 def join_lobby(sid, lobby_id):
     lobby_id = int(lobby_id)
+
+    if lobby_id not in lobbies:
+        # Lobby no longer exists
+        return # TODO: Present error message to user
+
     uid = clients[sid]['uid']
 
     if uid not in users:
