@@ -45,6 +45,18 @@ $(() => {
 
 
     //*************************************************************** SERVER COMMS
+    let ping_sent = 0;
+
+    setInterval(() => {
+        ping_sent = new Date().getTime();
+        socket.emit('my_ping');
+    }, 3000);
+
+    socket.on('my_pong', () => {
+        const delay = new Date().getTime() - ping_sent;
+        $('#navbar-status').html(delay.toString() + 'ms');
+    })
+
     socket.on('username_taken', () => {
         alert('Username taken');
     });
@@ -58,8 +70,10 @@ $(() => {
         alert('Invalid credentials');
     });
 
-    socket.on('logged_in', () => {
+    socket.on('logged_in', (username) => {
         alert('Logged in');
         $('#login').hide();
+
+        $('#navbar-account').html('Logged in as ' + username);
     });
 });

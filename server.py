@@ -61,6 +61,10 @@ def disconnect(sid):
     print(f'Disconnected: {sid}')
     users[sid]['connected'] = False
 
+@sio.on('my_ping')
+def my_ping(sid):
+    sio.emit('my_pong', room=sid)
+
 @sio.on('register')
 def register(sid, details):
     # TODO: Perform validity checks. Store pw_hash. Store more info
@@ -104,7 +108,7 @@ def login(sid, details):
             users[sid]['logged_in'] = True
             users[sid]['username'] = details['username']
 
-            sio.emit('logged_in', room=sid)
+            sio.emit('logged_in', details['username'], room=sid)
 
         else:
             # Don't specify that the password is just incorrect, otherwise
