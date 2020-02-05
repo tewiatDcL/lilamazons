@@ -64,10 +64,26 @@ $(() => {
 
     socket.on('my_pong', () => {
         const delay = new Date().getTime() - ping_sent;
-        $('#navbar-status').html(delay.toString() + 'ms');
-        $('#navbar-status').removeClass('error');
+        $('#status-ping').html(delay.toString() + 'ms');
+        $('#status-ping').removeClass('error');
     })
 
+    socket.on('disconnect', () => {
+        $('#status-ping').html('DISCONNECTED');
+        $('#status-ping').addClass('error');
+    });
+
+    setInterval(() => {
+        socket.emit('get_server_stats');
+    }, 10000);
+
+    socket.on('server_stats', (stats) => {
+        const users   = 'Logged in ' + stats.users_online.toString();
+        const clients = stats.clients_online.toString() + ' online';
+        $('#status-online').html(users + '/' + clients);
+    });
+
+    //* Account
     socket.on('username_taken', () => {
         alert('Username taken');
     });
@@ -87,11 +103,6 @@ $(() => {
 
         $('#navbar-account').html('Logged in as ' + username);
         $('#navbar-login-required').show();
-    });
-
-    socket.on('disconnect', () => {
-        $('#navbar-status').html('DISCONNECTED');
-        $('#navbar-status').addClass('error');
     });
 
     //* Game Setup

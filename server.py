@@ -72,10 +72,22 @@ def disconnect(sid):
     global clients_online
     clients_online -= 1
 
+    if clients[sid]['logged_in']:
+        global users_online
+        users_online -= 1
+
 @sio.on('my_ping')
 def my_ping(sid):
     sio.emit('my_pong', room=sid)
 
+@sio.on('get_server_stats')
+def get_server_stats(sid):
+    sio.emit('server_stats', {
+        'clients_online': clients_online,
+        'users_online': users_online
+    })
+
+#* Accounts
 @sio.on('register')
 def register(sid, details):
     # TODO: Perform validity checks. Store pw_hash. Store more info
@@ -116,6 +128,7 @@ def login(sid, details):
     if res: # User exists
         if res['pw_hash'] == details['password']:
             # Login succeeded
+            # TODO: Disallow multiple logon?
             clients[sid]['logged_in'] = True
             clients[sid]['uid'] = res['id']
 
@@ -125,6 +138,9 @@ def login(sid, details):
             }
 
             sio.emit('logged_in', details['username'], room=sid)
+
+            global users_online
+            users_online += 1
 
             # Check whether the user had a lobby open
             if res['id'] in lobbies:
@@ -141,6 +157,7 @@ def login(sid, details):
 #* Game Setup
 @sio.on('create_lobby')
 def create_lobby(sid):
+    # TODO: Lobbies should expire after a while
     uid = clients[sid]['uid']
 
     if uid not in users:
