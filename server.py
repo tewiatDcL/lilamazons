@@ -91,10 +91,11 @@ def my_ping(sid):
 
 @sio.on('get_server_stats')
 def get_server_stats(sid):
+    # TODO: Change this to emit to all clients on server-based timing
     sio.emit('server_stats', {
         'clients_online': clients_online,
         'users_online': users_online
-    })
+    }, room=sid)
 
 #* Accounts
 @sio.on('register')
@@ -175,11 +176,14 @@ def login(sid, details):
 @sio.on('create_lobby')
 def create_lobby(sid):
     # TODO: Lobbies should expire after a while
-    # TODO: Prevent creation of multiple lobbies by one user
     uid = clients[sid]['uid']
 
     if uid not in users:
         return # TODO: Log this event
+
+    # Make sure user isn't already in a lobby
+    if users[uid]['in_lobby']:
+        return # TODO: Present error message to user
 
     global lobby_id
     lid = lobby_id
@@ -202,12 +206,15 @@ def get_open_lobbies(sid):
 
 @sio.on('join_lobby')
 def join_lobby(sid, lobby_id):
-    # TODO: Prevent users from joining multiple lobbies
     lobby_id = int(lobby_id)
     uid = clients[sid]['uid']
 
     if uid not in users:
         return # TODO: Log this event
+
+    # Make sure user isn't already in a lobby
+    if users[uid]['in_lobby']:
+        return # TODO: Present error message to user
 
     # Add current user to the lobby
     lobbies[lobby_id]['players'][users[uid]['username']] = uid
@@ -219,6 +226,42 @@ def join_lobby(sid, lobby_id):
     for p in players:
         usid = users[players[p]]['sid']
         sio.emit('lobby_data', lobbies[lobby_id], room=usid)
+
+@sio.on('lobby_cancel')
+def lobby_cancel(sid):
+    uid = clients[sid]['uid']
+    lobby_id = users[uid]['in_lobby']
+
+    if lobby_id not in lobbies:
+        return # TODO: Log this event
+
+    if lobbies[lobby_id]['host_id'] == uid:
+        # User is host, so kick everyone out of the lobby
+        players = lobbies[lobby_id]['players']
+
+        for p in players:
+            uid  = players[p]
+            usid = users[uid]['sid']
+
+            users[uid]['in_lobby'] = None
+            sio.emit('leave_lobby', room=usid)
+
+        # Delete the lobby
+        del lobbies[lobby_id]
+
+    else:
+        # User is just leaving a lobby themselves
+        users[uid]['in_lobby'] = None
+        sio.emit('leave_lobby', room=sid)
+
+        del lobbies[lobby_id]['players'][users[uid]['username']]
+
+        # Update the lobby for the remaining players
+        players = lobbies[lobby_id]['players']
+
+        for p in players:
+            usid = users[players[p]]['sid']
+            sio.emit('lobby_data', lobbies[lobby_id], room=usid)
 
 @sio.on('lobby_start')
 def lobby_start(sid):

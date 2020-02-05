@@ -59,6 +59,12 @@ $(() => {
     });
 
     //* Lobby
+    $('#lobby').on('click', 'a', (e) => {
+        if (e.target.id == 'lobby-cancel') {
+            socket.emit('lobby_cancel');
+        }
+    });
+
     $('#lobby').on('click', 'input', (e) => {
         if (e.target.id == 'btn-lobby-start') {
             socket.emit('lobby_start');
@@ -143,5 +149,9 @@ $(() => {
 
         html += '</table>'
         $('#lobbies-list').html(html);
+    });
+
+    socket.on('leave_lobby', () => {
+        $('#lobby').hide();
     });
 });
