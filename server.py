@@ -28,7 +28,11 @@ cur = con.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
 print('Connected to DB') # TODO: Actually check for success
 
 # Server operation
-users = {}
+clients = {} # Those who are NOT logged in
+users   = {} # Those who ARE logged in
+clients_online = 0
+users_online   = 0
+
 lobbies = {}
 
 
@@ -51,16 +55,22 @@ def main():
 def connect(sid, env):
     print(f'Connected: {sid}')
 
-    users[sid] = {
+    clients[sid] = {
         'connected': True,
         'logged_in': False,
-        'username': None
+        'uid': None
     }
+
+    global clients_online
+    clients_online += 1
 
 @sio.on('disconnect')
 def disconnect(sid):
     print(f'Disconnected: {sid}')
-    users[sid]['connected'] = False
+    clients[sid]['connected'] = False
+
+    global clients_online
+    clients_online -= 1
 
 @sio.on('my_ping')
 def my_ping(sid):
@@ -106,8 +116,13 @@ def login(sid, details):
     if res: # User exists
         if res['pw_hash'] == details['password']:
             # Login succeeded
-            users[sid]['logged_in'] = True
-            users[sid]['username'] = details['username']
+            clients[sid]['logged_in'] = True
+            clients[sid]['uid'] = res['id']
+
+            users[res['id']] = {
+                'username': res['username'],
+                'online': True
+            }
 
             sio.emit('logged_in', details['username'], room=sid)
 
@@ -122,11 +137,16 @@ def login(sid, details):
 #* Game Setup
 @sio.on('create_lobby')
 def create_lobby(sid):
-    lobbies[sid] = {
-        'players': [ users[sid]['username'] ]
+    uid = clients[sid]['uid']
+
+    if uid not in users:
+        return # TODO: Log this event
+
+    lobbies[uid] = {
+        'players': [ users[uid]['username'] ]
     }
 
-    sio.emit('lobby_data', lobbies[sid], room=sid)
+    sio.emit('lobby_data', lobbies[uid], room=sid)
 
 @sio.on('get_open_lobbies')
 def get_open_lobbies(sid):
