@@ -128,6 +128,10 @@ def create_lobby(sid):
 
     sio.emit('lobby_data', lobbies[sid], room=sid)
 
+@sio.on('get_open_lobbies')
+def get_open_lobbies(sid):
+    sio.emit('open_lobbies', lobbies, room=sid)
+
 
 #*################################################################### ENTRY
 if __name__ == '__main__':

@@ -10,6 +10,9 @@ html, body {
 }
 
 div#navbar {
+    position: relative;
+    z-index: 1;
+
     padding-left:  5px;
     padding-right: 5px;
 
@@ -33,6 +36,7 @@ div#register, div#login {
     display: none;
 
     position: absolute;
+    z-index:  1;
     top:      25px;
     left:     10px;
     width:    auto;
@@ -43,14 +47,13 @@ div#register, div#login {
     background: white;
     border: 1px #ddd solid;
 
-    box-shadow: 5px 5px #eee;
+    box-shadow: 5px 5px rgba(0,0,0,.1);
 }
 
 div#main-container {
     display: flex;
 
     position: absolute;
-    z-index: -1;
     top:      0;
     bottom:   0;
     left:     0;
@@ -78,6 +81,10 @@ div#main {
     padding-top: 20px;
 }
 
+div#game-browser {
+    display: none;
+}
+
 p {
     font: 10px 'Saira Semi Condensed';
 }
@@ -97,6 +104,11 @@ p.header2 {
     border-bottom: 1px #ddd solid;
 }
 
+p.header3 {
+    margin-left: 5px;
+    font-style: italic;
+}
+
 a {
     text-decoration: none;
     color: teal;
@@ -104,6 +116,29 @@ a {
 
 a:hover {
     text-decoration: underline;
+}
+
+table {
+    margin: 5px;
+    width:  95%;
+
+    border-spacing: 0;
+}
+
+tr:first-child {
+    background: #f0f0f0 !important;
+}
+
+tr:first-child > td {
+    border-bottom: 1px #aaa solid;
+}
+
+tr:nth-child(even) {
+    background: #f8f8f8;
+}
+
+td {
+    padding-left: 5px;
 }
 
 input {
@@ -135,4 +170,11 @@ input[type="button"] {
 
 input[type="button"]:hover {
     border: 1px #aaa solid;
+}
+
+input.small {
+    margin-left: 5px;
+    margin-top:  5px;
+
+    width: 100px;
 }

@@ -21,7 +21,8 @@
                     <a href="#" id="navbar-login">Log in</a>
                 </span> |
                 <span id="navbar-login-required">
-                    <a href="#" id="navbar-create-lobby">Create lobby</a>
+                    <a href="#" id="navbar-create-lobby">Create lobby</a> |
+                    <a href="#" id="navbar-browse-games">Browse games</a>
                 </span>
 
                 <span id="navbar-status"></span>
@@ -51,10 +52,16 @@
                 <div id="lobby">
                     <p class="header2">Lobby</p>
                     <div id="lobby-info"></div>
+                    <input type="button" class="small" id="btn-lobby-start" value="Start">
                 </div>
             </div>
 
-            <div id="main"></div>
+            <div id="main">
+                <div id="game-browser">
+                    <p class="header3">Game Browser</p>
+                    <div id="lobbies-list"></div>
+                </div>
+            </div>
         </div>
     </body>
 </html>

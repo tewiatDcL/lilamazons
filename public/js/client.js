@@ -28,6 +28,11 @@ $(() => {
             $('#lobby').show();
             socket.emit('create_lobby');
         }
+
+        else if (e.target.id == 'navbar-browse-games') {
+            $('#game-browser').show();
+            socket.emit('get_open_lobbies');
+        }
     });
 
     $('#register').on('click', 'input', (e) => {
@@ -86,5 +91,16 @@ $(() => {
     //* Game Setup
     socket.on('lobby_data', (data) => {
         $('#lobby-info').html('<p>' + JSON.stringify(data) + '</p>');
+    });
+
+    socket.on('open_lobbies', (lobbies) => {
+        let html = '<table><tr><td><p>Players</p></td><td><p>Join</p></td></tr>';
+
+        for (let k in lobbies) {
+            html += '<tr><td><p>' + lobbies[k].players + '</p></td><td><p><a href="#">Join</a></p></td>';
+        }
+
+        html += '</table>'
+        $('#lobbies-list').html(html);
     });
 });
