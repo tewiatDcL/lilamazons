@@ -126,6 +126,10 @@ def login(sid, details):
 
             sio.emit('logged_in', details['username'], room=sid)
 
+            # Check whether the user had a lobby open
+            if res['id'] in lobbies:
+                sio.emit('lobby_data', lobbies[res['id']], room=sid)
+
         else:
             # Don't specify that the password is just incorrect, otherwise
             # malicious actors could farm for usernames

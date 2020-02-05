@@ -109,6 +109,10 @@ p.header3 {
     font-style: italic;
 }
 
+.error {
+    color: red;
+}
+
 a {
     text-decoration: none;
     color: teal;

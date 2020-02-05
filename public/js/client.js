@@ -65,6 +65,7 @@ $(() => {
     socket.on('my_pong', () => {
         const delay = new Date().getTime() - ping_sent;
         $('#navbar-status').html(delay.toString() + 'ms');
+        $('#navbar-status').removeClass('error');
     })
 
     socket.on('username_taken', () => {
@@ -88,8 +89,14 @@ $(() => {
         $('#navbar-login-required').show();
     });
 
+    socket.on('disconnect', () => {
+        $('#navbar-status').html('DISCONNECTED');
+        $('#navbar-status').addClass('error');
+    });
+
     //* Game Setup
     socket.on('lobby_data', (data) => {
+        $('#lobby').show();
         $('#lobby-info').html('<p>' + JSON.stringify(data) + '</p>');
     });
 
