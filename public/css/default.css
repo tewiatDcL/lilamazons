@@ -5,6 +5,10 @@
     padding: 0;
 }
 
+html, body {
+    height: 100%;
+}
+
 div#navbar {
     padding-left:  5px;
     padding-right: 5px;
@@ -19,6 +23,10 @@ div#navbar > p {
 
 span#navbar-status {
     float: right;
+}
+
+span#navbar-login-required {
+    display: none;
 }
 
 div#register, div#login {
@@ -38,16 +46,55 @@ div#register, div#login {
     box-shadow: 5px 5px #eee;
 }
 
+div#main-container {
+    display: flex;
+
+    position: absolute;
+    z-index: -1;
+    top:      0;
+    bottom:   0;
+    left:     0;
+    right:    0;
+}
+
+div#sidebar {
+    flex: 1;
+    padding-top: 20px;
+
+    background: #f8f8f8;
+    border-right: 1px #ddd solid;
+}
+
+div#lobby {
+    display: none;
+}
+
+div#lobby-info {
+    margin-left: 10px;
+}
+
+div#main {
+    flex: 4;
+    padding-top: 20px;
+}
+
 p {
     font: 10px 'Saira Semi Condensed';
 }
 
-p.header {
+p.header, p.header2 {
     margin-bottom: 3px;
-    margin-right:  5px;
+    padding-right: 5px;
 
     text-align: right;
     font-style: italic;
+}
+
+p.header2 {
+    background: white;
+
+    border-top:    1px #ddd solid;
+    border-bottom: 1px #ddd solid;
 }
 
 a {

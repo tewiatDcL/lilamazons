@@ -23,6 +23,11 @@ $(() => {
                 $('#login').show();
             }
         }
+
+        else if (e.target.id == 'navbar-create-lobby') {
+            $('#lobby').show();
+            socket.emit('create_lobby');
+        }
     });
 
     $('#register').on('click', 'input', (e) => {
@@ -75,5 +80,11 @@ $(() => {
         $('#login').hide();
 
         $('#navbar-account').html('Logged in as ' + username);
+        $('#navbar-login-required').show();
+    });
+
+    //* Game Setup
+    socket.on('lobby_data', (data) => {
+        $('#lobby-info').html('<p>' + JSON.stringify(data) + '</p>');
     });
 });

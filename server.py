@@ -29,6 +29,7 @@ print('Connected to DB') # TODO: Actually check for success
 
 # Server operation
 users = {}
+lobbies = {}
 
 
 #*################################################################### MAIN
@@ -117,6 +118,15 @@ def login(sid, details):
 
     else:
         sio.emit('invalid_credentials', room=sid)
+
+#* Game Setup
+@sio.on('create_lobby')
+def create_lobby(sid):
+    lobbies[sid] = {
+        'players': [ users[sid]['username'] ]
+    }
+
+    sio.emit('lobby_data', lobbies[sid], room=sid)
 
 
 #*################################################################### ENTRY
