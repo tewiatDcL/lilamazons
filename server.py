@@ -34,6 +34,7 @@ clients_online = 0
 users_online   = 0
 
 lobbies = {}
+lobby_id = 0
 
 
 #*################################################################### MAIN
@@ -133,6 +134,7 @@ def login(sid, details):
             clients[sid]['uid'] = res['id']
 
             users[res['id']] = {
+                'sid': sid,
                 'username': res['username'],
                 'online': True
             }
@@ -163,8 +165,15 @@ def create_lobby(sid):
     if uid not in users:
         return # TODO: Log this event
 
+    global lobby_id
+    lid = lobby_id
+    lobby_id += 1
+
     lobbies[uid] = {
-        'players': [ users[uid]['username'] ]
+        'id': lid,
+        'players': {
+            users[uid]['username']: uid
+        }
     }
 
     sio.emit('lobby_data', lobbies[uid], room=sid)
@@ -172,6 +181,22 @@ def create_lobby(sid):
 @sio.on('get_open_lobbies')
 def get_open_lobbies(sid):
     sio.emit('open_lobbies', lobbies, room=sid)
+
+@sio.on('join_lobby')
+def join_lobby(sid, lobby_id):
+    # TODO: Prevent users from joining multiple lobbies
+    lobby_id = int(lobby_id)
+    uid = clients[sid]['uid']
+
+    for l in lobbies:
+        if lobbies[l]['id'] == lobby_id:
+            lobbies[l]['players'][users[uid]['username']] = uid
+
+            for p in lobbies[l]['players']:
+                usid = users[lobbies[l]['players'][p]]['sid']
+                sio.emit('lobby_data', lobbies[l], room=usid)
+
+            return
 
 
 #*################################################################### ENTRY

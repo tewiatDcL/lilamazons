@@ -53,6 +53,11 @@ $(() => {
         }
     });
 
+    //* Game Browser
+    $('#lobbies-list').on('click', 'a', (e) => {
+        socket.emit('join_lobby', e.target.id);
+    });
+
 
     //*************************************************************** SERVER COMMS
     let ping_sent = 0;
@@ -112,10 +117,21 @@ $(() => {
     });
 
     socket.on('open_lobbies', (lobbies) => {
-        let html = '<table><tr><td><p>Players</p></td><td><p>Join</p></td></tr>';
+        let html = '<table><tr><td><p>Lobby ID</p></td><td><p>Players</p></td><td><p>Join</p></td></tr>';
 
         for (let k in lobbies) {
-            html += '<tr><td><p>' + lobbies[k].players + '</p></td><td><p><a href="#">Join</a></p></td>';
+            let players = '';
+            for (p in lobbies[k].players) {
+                players += p + ', ';
+            }
+
+            html += '<tr><td><p>'
+                + lobbies[k].id.toString()
+                + '</p></td><td><p>'
+                + players.slice(0, -2)
+                + '</p></td><td><p><a href="#" id="'
+                + lobbies[k].id.toString()
+                + '">Join</a></p></td>';
         }
 
         html += '</table>'
